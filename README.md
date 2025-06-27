@@ -15,6 +15,18 @@ CloudLingo is a cloud-native application that leverages AWS services to provide 
 
 This project demonstrates practical implementation of AWS serverless architecture, Infrastructure as Code (IaC) with Terraform, and cloud-native development practices as part of an AWS cloud training capstone project.
 
+## Branch Overview
+
+### `master` branch
+
+A simple implementation where files are manually uploaded to Amazon S3 for processing.  
+This branch demonstrates the core infrastructure using Terraform, including S3 buckets, IAM roles, and Lambda functions.
+
+### `api-gateway` branch
+
+Extends the project with an API Gateway to enable programmatic uploads and interactions.  
+This branch lays the foundation for integrating a real-time frontend translation interface, coming in a future update.
+
 ## 📸 Service Documentation & Proof of Concept
 
 The following screenshots demonstrate the working service and successful deployment:
