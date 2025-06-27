@@ -17,3 +17,8 @@ output "response_bucket_name" {
 output "lambda_function_name" {
   value = aws_lambda_function.translate_function.function_name
 }
+
+#utput full usable API endpoint for /translate
+output "cloudlingo_api_url" {
+  value = "${aws_apigatewayv2_api.cloudlingo_api.api_endpoint}/translate"
+}

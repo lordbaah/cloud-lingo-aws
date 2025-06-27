@@ -19,11 +19,13 @@ resource "aws_lambda_function" "translate_function" {
   memory_size = 128
   timeout     = 10
 
-  environment {
+   environment {
     variables = {
+      REQUEST_BUCKET  = aws_s3_bucket.request_bucket.bucket
       RESPONSE_BUCKET = aws_s3_bucket.response_bucket.bucket
     }
   }
+
 
   tags = {
     Name        = "${var.project_name} Lambda Function"
