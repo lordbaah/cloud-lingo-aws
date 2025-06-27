@@ -119,6 +119,17 @@ Upload a sample file to the created S3 bucket:
 aws s3 cp sample-data/test-document.txt s3://your-cloudlingo-bucket/
 ```
 
+### 5. Clean Up Resources (Important!)
+
+⚠️ **To avoid AWS charges, destroy all resources after testing:**
+
+```bash
+cd terraform
+terraform destroy
+```
+
+**Note**: Always run `terraform destroy` when you're done testing to prevent ongoing AWS costs.
+
 ## 📝 Configuration
 
 ### Environment Variables
@@ -205,7 +216,12 @@ aws s3 sync sample-data/ s3://your-cloudlingo-bucket/
 
 # Monitor processing logs
 aws logs tail /aws/lambda/cloudlingo-processor --follow
+
+# Clean up after testing (IMPORTANT!)
+terraform destroy
 ```
+
+⚠️ **Remember**: Always run `terraform destroy` after testing to avoid AWS charges!
 
 ### 📤 File Upload Process
 
@@ -234,6 +250,16 @@ _Evidence of successful file processing and output generation_
 1. **Deploy AWS Resources**: Use Terraform to create all necessary AWS infrastructure
 2. **Lambda Function**: Code is automatically packaged and deployed by Terraform
 3. **Testing**: Upload sample files to verify functionality
+4. **Clean Up**: Run `terraform destroy` to remove all resources and avoid costs
+
+### 💰 Cost Management
+
+**Important**: This project creates AWS resources that may incur charges. To avoid unexpected costs:
+
+- Monitor your AWS billing dashboard during testing
+- Run `terraform destroy` immediately after testing
+- Consider using AWS Free Tier eligible services where possible
+- Set up billing alerts in your AWS account
 
 ## 🔧 Customization
 
