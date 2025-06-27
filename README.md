@@ -30,7 +30,7 @@ The Terraform configuration is organized into separate files for better maintain
 - **[`variables.tf`](terraform/variables.tf)**: Input variables and configuration
 - **[`outputs.tf`](terraform/outputs.tf)**: Output values for created resources
 
-The Lambda source code in [`terraform/lambda/`](terraform/lambda/) is automatically zipped and deployed by Terraform during the `terraform apply` process.
+The Lambda source code in [`lambda/`](/lambda/) is automatically zipped and deployed by Terraform during the `terraform apply` process.
 
 ### 🏗️ Service Architecture
 
