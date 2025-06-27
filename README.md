@@ -42,14 +42,14 @@ _AWS services and their interactions in the CloudLingo system_
 ![Terraform Apply](screenshots/terraform-deployment.png)
 _Successful infrastructure provisioning using Terraform_
 
-### 🪣 S3 Bucket Configuration
+### 🪣 S3 Bucket
 
-![S3 Bucket Setup](screenshots/s3-bucket-setup.png)
-_S3 bucket with event notifications configured_
+![S3 Bucket Setup](screenshots/s3-bucket-console.png)
+_S3 bucket deployed on AWS Console_
 
 ### λ Lambda Function
 
-![Lambda Function](screenshots/lambda-function-console.png)
+![Lambda Function](screenshots/lambda-function-console-1.png)
 _Lambda function deployed and configured in AWS Console_
 
 ## 📁 Project Structure
@@ -57,12 +57,11 @@ _Lambda function deployed and configured in AWS Console_
 ```
 cloud-lingo-aws/
 ├── lambda/                 # Lambda function source code
-│   ├── main.py            # Main Lambda handler
-│   ├── requirements.txt   # Python dependencies
-│   └── utils/             # Utility functions
+│   ├── translate_handler.py           # Main Lambda handler
+│
 ├── sample-data/           # Sample files for testing
 │   ├── test-document.txt
-│   └── example-data.json
+│   └── input_sample.json
 ├── terraform/             # Infrastructure as Code (Terraform)
 │   ├── lambda/           # Lambda source code (auto-zipped by Terraform)
 │   ├── main.tf           # Main Terraform configuration
@@ -82,7 +81,7 @@ Before deploying CloudLingo, ensure you have:
 
 - AWS CLI configured with appropriate permissions
 - Terraform >= 1.0 installed
-- Python 3.9+ (for local development)
+- Python 3.9+ (for local development) optional
 - An AWS account with necessary service quotas
 
 ## 🚀 Quick Start
@@ -116,7 +115,7 @@ terraform apply
 Upload a sample file to the created S3 bucket:
 
 ```bash
-aws s3 cp sample-data/test-document.txt s3://your-cloudlingo-bucket/
+aws s3 cp sample-data/input_sample.json s3://your-cloudlingo-bucket/
 ```
 
 ### 5. Clean Up Resources (Important!)
@@ -136,9 +135,7 @@ terraform destroy
 
 The Lambda function uses the following environment variables:
 
-- `BUCKET_NAME`: S3 bucket name for file processing
-- `LOG_LEVEL`: Logging level (DEBUG, INFO, WARN, ERROR)
-- `PROCESSING_TIMEOUT`: Maximum processing time per file
+- ` RESPONSE_BUCKET`: S3 bucket name for file processing
 
 ### Terraform Variables
 
@@ -160,7 +157,7 @@ variable "project_name" {
 
 ### Handler Function
 
-The main Lambda handler is located in [`terraform/lambda/main.py`](terraform/lambda/main.py) and is automatically packaged and deployed by Terraform:
+The main Lambda handler is located in [`lambda/translate_handler.py`](/lambda/translate_handler.py) and is automatically packaged and deployed by Terraform:
 
 ```python
 def lambda_handler(event, context):
@@ -176,8 +173,7 @@ def lambda_handler(event, context):
 ### Terraform-Managed Deployment
 
 - **Automatic Packaging**: Terraform zips the Lambda code during deployment
-- **Source Location**: [`terraform/lambda/`](terraform/lambda/) directory
-- **Dependencies**: Managed through `requirements.txt` in the Lambda folder
+- **Source Location**: [`terraform/lambda/`](/lambda/) directory
 - **Configuration**: Defined in [`terraform/lambda.tf`](terraform/lambda.tf)
 
 ### Key Features
@@ -187,24 +183,21 @@ def lambda_handler(event, context):
 - **Error Handling**: Comprehensive error handling and logging
 - **Scalable Processing**: Handles multiple files concurrently
 
-![Lambda Function](screenshots/lambda-function.png)
+![Lambda Function](screenshots/lambda-function-console-2.png)
 
 ## 📊 Sample Data
 
 The [`sample-data/`](sample-data/) directory contains example files for testing:
 
 - `test-document.txt`: Sample text file for processing
-- `example-data.json`: JSON configuration examples
+- `input_sample.json`: JSON configuration examples
 
 ## 🛡️ Security & IAM Configuration
 
-![IAM Roles](screenshots/iam-roles-policies.png)
+![IAM Roles](screenshots/iam-roles-policies-1.png)
+
+![IAM Roles](screenshots/iam-roles-policies-2.png)
 _IAM roles and policies ensuring secure access and least privilege_
-
-## 📊 Service Performance
-
-![Service Metrics](screenshots/service-performance-metrics.png)
-_Performance metrics and service health indicators_
 
 ## 🧪 Testing & Service Validation
 
@@ -228,10 +221,11 @@ terraform destroy
 ![File Upload](screenshots/s3-file-upload.png)
 _Demonstration of file upload to S3 bucket_
 
-### 🔄 Lambda Execution
+![File Upload](screenshots/s3-file-uploaded-1.png)
+_request file upload to request S3 bucket_
 
-![Lambda Execution](screenshots/lambda-execution-logs.png)
-_Lambda function successfully processing uploaded files_
+![File Upload](screenshots/s3-file-uploaded-2.png)
+_response file saved in response S3 bucket_
 
 ### 📊 CloudWatch Monitoring
 
@@ -261,14 +255,8 @@ _Evidence of successful file processing and output generation_
 - Consider using AWS Free Tier eligible services where possible
 - Set up billing alerts in your AWS account
 
-## 🔧 Customization
-
-### Adding New Processing Logic
-
-1. Modify [`terraform/lambda/main.py`](terraform/lambda/main.py)
-2. Add dependencies to [`terraform/lambda/requirements.txt`](terraform/lambda/requirements.txt)
-3. Update Lambda configuration in [`terraform/lambda.tf`](terraform/lambda.tf) if needed
-4. Run `terraform apply` to deploy changes
+![Terminating Resources](screenshots/terminating-resources.png)
+_Evidence of successful termination_
 
 ### Scaling Considerations
 

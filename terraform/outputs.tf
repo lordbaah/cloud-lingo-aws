@@ -17,3 +17,9 @@ output "response_bucket_name" {
 output "lambda_function_name" {
   value = aws_lambda_function.translate_function.function_name
 }
+
+output "upload_command" {
+  description = "Run this command to upload input_sample.json to the request bucket"
+  value       = "aws s3 cp sample-data/input_sample.json s3://${aws_s3_bucket.request_bucket.bucket}/"
+}
+
