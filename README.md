@@ -7,7 +7,10 @@ A serverless language processing service built with AWS Lambda and S3, designed 
 > **Capstone Project** - AWS Cloud Training Program  
 > **Training Partner**: Azubi Africa in collaboration with Mastercard Foundation and Generation Ghana
 
-![CloudLingo Architecture](screenshots/architecture-overview.png)
+### 🏗️ Service Architecture
+
+![Service Architecture](screenshots/service-architecture.png)
+_AWS services and their interactions in the CloudLingo system_
 
 ## 🚀 Overview
 
@@ -43,11 +46,6 @@ The Terraform configuration is organized into separate files for better maintain
 - **[`outputs.tf`](terraform/outputs.tf)**: Output values for created resources
 
 The Lambda source code in [`lambda/`](/lambda/) is automatically zipped and deployed by Terraform during the `terraform apply` process.
-
-### 🏗️ Service Architecture
-
-![Service Architecture](screenshots/service-architecture.png)
-_AWS services and their interactions in the CloudLingo system_
 
 ### ⚡ Terraform Deployment
 
