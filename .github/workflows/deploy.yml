@@ -2,16 +2,16 @@ name: Deploy React to S3
 
 on:
   push:
-    branches: [feature/api-gateway] # change as needed
+    branches: [feature/api-gateway] # 🔁 Update this to match your deployment branch
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
     env:
-      BUCKET_NAME: cloudlingo-frontend-5nb17w # <-- ✅ replace with your real bucket name
-      DIST_DIR: dist # or build (for CRA)
-      AWS_REGION: us-east-1 # your AWS region
+      BUCKET_NAME: cloudlingo-frontend-5nb17w # ✅ Your actual S3 bucket name
+      DIST_DIR: dist # Vite default output folder
+      AWS_REGION: us-east-1 # Your AWS region
 
     steps:
       - name: Checkout code
@@ -28,24 +28,3 @@ jobs:
 
       - name: Build the React app
         run: npm run build
-        working-directory: ./react-frontend
-
-      - name: Upload to S3
-        uses: jakejarvis/s3-sync-action@master
-        with:
-          args: --delete
-        env:
-          AWS_S3_BUCKET: ${{ env.BUCKET_NAME }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          SOURCE_DIR: ./react-frontend/${{ env.DIST_DIR }}
-          DEST_DIR: /
-
-      - name: Invalidate CloudFront cache
-        uses: chetan/invalidate-cloudfront-action@v2
-        env:
-          DISTRIBUTION: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
-          PATHS: '/*'
-          AWS_REGION: ${{ env.AWS_REGION }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
