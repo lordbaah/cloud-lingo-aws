@@ -2,7 +2,16 @@
 resource "aws_apigatewayv2_api" "cloudlingo_api" {
   name          = "${var.project_name}-http-api"
   protocol_type = "HTTP"
+
+  cors_configuration {
+    allow_origins     = ["*"]  # for open access replace with actual website url in production
+    allow_methods     = ["POST", "OPTIONS"]
+    allow_headers     = ["Content-Type"]
+    expose_headers    = []
+    max_age           = 3600
+  }
 }
+
 
 # 2. Create integration with Lambda
 resource "aws_apigatewayv2_integration" "cloudlingo_integration" {

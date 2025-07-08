@@ -12,6 +12,18 @@ RESPONSE_BUCKET = os.environ["RESPONSE_BUCKET"]
 
 def lambda_handler(event, context):
     try:
+        # ✅ Handle CORS preflight (OPTIONS) request
+        if event.get("httpMethod") == "OPTIONS":
+            return {
+                "statusCode": 200,
+                "headers": {
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "POST,OPTIONS",
+                    "Access-Control-Allow-Headers": "*"
+                },
+                "body": ""
+            }
+
         # 🔁 Path 1: API Gateway POST (frontend or Postman)
         if "body" in event:
             body = json.loads(event["body"])
@@ -64,7 +76,10 @@ def lambda_handler(event, context):
                 "statusCode": 200,
                 "body": json.dumps(translated_payload),
                 "headers": {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Methods": "POST,OPTIONS",
+                    "Access-Control-Allow-Headers": "*"
                 }
             }
 
@@ -112,5 +127,10 @@ def lambda_handler(event, context):
         return {
             "statusCode": 500,
             "body": json.dumps({"error": str(e)}),
-            "headers": {"Content-Type": "application/json"}
-        }
+            "headers": {
+                "Content-Type": "application/json",
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Methods": "POST,OPTIONS",
+                "Access-Control-Allow-Headers": "*"
+            }
+ }

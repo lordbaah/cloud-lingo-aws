@@ -21,12 +21,6 @@ resource "aws_s3_bucket" "frontend" {
   }
 }
 
-# Set the bucket ACL to private
-resource "aws_s3_bucket_acl" "frontend_acl" {
-  bucket = aws_s3_bucket.frontend.id
-  acl    = "private"
-}
-
 # Create CloudFront Origin Access Control (OAC)
 resource "aws_cloudfront_origin_access_control" "frontend_oac" {
   name                              = "${var.project_name}-frontend-oac"
@@ -36,7 +30,7 @@ resource "aws_cloudfront_origin_access_control" "frontend_oac" {
   signing_protocol                  = "sigv4"
 }
 
-# Create a secure bucket policy allowing CloudFront to access S3 via OAC
+# Generate IAM policy for S3 bucket to allow access from CloudFront
 data "aws_iam_policy_document" "frontend_policy" {
   statement {
     principals {
@@ -54,13 +48,28 @@ data "aws_iam_policy_document" "frontend_policy" {
       "${aws_s3_bucket.frontend.arn}/*"
     ]
 
-    condition {
-      test     = "StringEquals"
-      variable = "AWS:SourceArn"
-      values   = [aws_cloudfront_distribution.frontend.arn]
-    }
+    # ⚠️ IMPORTANT:
+    # The condition block below ensures that ONLY your specific CloudFront distribution
+    # can access this S3 bucket, using AWS:SourceArn match.
+    #
+    # However, it creates a circular dependency:
+    # - The policy needs the CloudFront distribution ARN
+    # - But the CloudFront distribution waits for this policy to be applied
+    #
+    # ✅ To avoid this Terraform cycle error, this condition block is commented out.
+    # ✅ You can uncomment it and re-apply Terraform AFTER the initial deployment.
+
+    # condition {
+    #   test     = "StringEquals"
+    #   variable = "AWS:SourceArn"
+    #   values   = [aws_cloudfront_distribution.frontend.arn]
+    # }
+
+    # TODO: After first `terraform apply`, uncomment the `condition` block above
+    # and run `terraform apply` again to secure bucket access to this specific CloudFront distribution.
   }
 }
+
 
 resource "aws_s3_bucket_policy" "frontend" {
   bucket = aws_s3_bucket.frontend.id
@@ -97,6 +106,19 @@ resource "aws_cloudfront_distribution" "frontend" {
     default_ttl = 3600
     max_ttl     = 86400
   }
+
+  custom_error_response {
+    error_code            = 403
+    response_code         = 200
+    response_page_path    = "/index.html"
+  }
+
+  custom_error_response {
+    error_code            = 404
+    response_code         = 200
+    response_page_path    = "/index.html"
+  }
+
 
   viewer_certificate {
     cloudfront_default_certificate = true
