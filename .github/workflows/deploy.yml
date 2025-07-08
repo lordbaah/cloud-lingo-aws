@@ -2,49 +2,49 @@ name: Deploy React to S3
 
 on:
   push:
-    branches: [feature/api-gateway] # Trigger only on pushes to this branch
+    branches: [feature/api-gateway] # 🚀 Trigger deployment on push to this branch
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest # 🧱 Use GitHub-hosted Ubuntu runner
 
     env:
-      BUCKET_NAME: cloudlingo-frontend-5nb17w # Target S3 bucket
-      DIST_DIR: dist # Change to 'build' if you're using Create React App
+      BUCKET_NAME: cloudlingo-frontend-5nb17w # 🪣 Target S3 bucket name
+      DIST_DIR: dist # 📁 Build output directory (for Vite)
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3 # Fetch repository code
+        uses: actions/checkout@v3 # 📥 Pull latest code from the repo
 
       - name: Set up Node
         uses: actions/setup-node@v3
         with:
-          node-version: 18 # Ensure correct Node.js version
+          node-version: 18 # 🔧 Set Node.js version used by the project
 
       - name: Install dependencies
         run: npm install
-        working-directory: ./cloud-lingo-aws # Point to app directory
+        working-directory: ./react-frontend # 📦 Ensure it runs in the correct project folder
 
       - name: Build the React app
         run: npm run build
-        working-directory: ./cloud-lingo-aws # Outputs to dist/
+        working-directory: ./react-frontend # 🏗️ Compile the app into static files
 
       - name: Upload to S3
         uses: jakejarvis/s3-sync-action@master
         with:
-          args: --delete # Remove old files from S3
+          args: --delete # 🔁 Sync files and remove any not present in new build
         env:
           AWS_S3_BUCKET: ${{ env.BUCKET_NAME }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }} # Stored in GitHub secrets
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }} # 🔐 Provided via GitHub Secrets
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          SOURCE_DIR: ./cloud-lingo-aws/${{ env.DIST_DIR }}
+          SOURCE_DIR: ./react-frontend/${{ env.DIST_DIR }} # 📤 Upload built files from this path
           DEST_DIR: /
 
       - name: Invalidate CloudFront cache
         uses: chetan/invalidate-cloudfront-action@v2
         with:
-          distribution-id: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} # CloudFront distribution to refresh
-          paths: '/*' # Invalidate entire cache
+          distribution-id: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} # 🔄 Ensure users get the latest build
+          paths: '/*'
         env:
           AWS_REGION: us-east-1
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
