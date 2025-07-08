@@ -12,20 +12,20 @@ RESPONSE_BUCKET = os.environ["RESPONSE_BUCKET"]
 
 def lambda_handler(event, context):
     try:
-        # ✅ Handle CORS preflight (OPTIONS) request
-        if event.get("httpMethod") == "OPTIONS":
+        # ✅ Handle CORS preflight (OPTIONS) request for API Gateway V2
+        if event.get("requestContext", {}).get("http", {}).get("method") == "OPTIONS":
             return {
                 "statusCode": 200,
                 "headers": {
                     "Access-Control-Allow-Origin": "*",
                     "Access-Control-Allow-Methods": "POST,OPTIONS",
-                    "Access-Control-Allow-Headers": "*"
+                    "Access-Control-Allow-Headers": "Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token"
                 },
                 "body": ""
             }
 
         # 🔁 Path 1: API Gateway POST (frontend or Postman)
-        if "body" in event:
+        if "body" in event and event.get("requestContext"):
             body = json.loads(event["body"])
             text = body["text"]
             source_lang = body["source_lang"]
@@ -79,48 +79,49 @@ def lambda_handler(event, context):
                     "Content-Type": "application/json",
                     "Access-Control-Allow-Origin": "*",
                     "Access-Control-Allow-Methods": "POST,OPTIONS",
-                    "Access-Control-Allow-Headers": "*"
+                    "Access-Control-Allow-Headers": "Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token"
                 }
             }
 
         # 🔁 Path 2: S3 Upload Trigger
-        for record in event["Records"]:
-            source_bucket = record["s3"]["bucket"]["name"]
-            object_key = record["s3"]["object"]["key"]
+        if "Records" in event:
+            for record in event["Records"]:
+                source_bucket = record["s3"]["bucket"]["name"]
+                object_key = record["s3"]["object"]["key"]
 
-            # Download the uploaded file
-            response = s3.get_object(Bucket=source_bucket, Key=object_key)
-            file_content = response["Body"].read().decode("utf-8")
-            data = json.loads(file_content)
+                # Download the uploaded file
+                response = s3.get_object(Bucket=source_bucket, Key=object_key)
+                file_content = response["Body"].read().decode("utf-8")
+                data = json.loads(file_content)
 
-            text = data["text"]
-            source_lang = data["source_lang"]
-            target_lang = data["target_lang"]
+                text = data["text"]
+                source_lang = data["source_lang"]
+                target_lang = data["target_lang"]
 
-            # Translate
-            result = translate.translate_text(
-                Text=text,
-                SourceLanguageCode=source_lang,
-                TargetLanguageCode=target_lang
-            )
+                # Translate
+                result = translate.translate_text(
+                    Text=text,
+                    SourceLanguageCode=source_lang,
+                    TargetLanguageCode=target_lang
+                )
 
-            translated_data = {
-                "original_text": text,
-                "translated_text": result["TranslatedText"],
-                "source_lang": source_lang,
-                "target_lang": target_lang
-            }
+                translated_data = {
+                    "original_text": text,
+                    "translated_text": result["TranslatedText"],
+                    "source_lang": source_lang,
+                    "target_lang": target_lang
+                }
 
-            # Save to response bucket
-            output_key = f"translated-{os.path.basename(object_key)}"
-            s3.put_object(
-                Bucket=RESPONSE_BUCKET,
-                Key=output_key,
-                Body=json.dumps(translated_data),
-                ContentType="application/json"
-            )
+                # Save to response bucket
+                output_key = f"translated-{os.path.basename(object_key)}"
+                s3.put_object(
+                    Bucket=RESPONSE_BUCKET,
+                    Key=output_key,
+                    Body=json.dumps(translated_data),
+                    ContentType="application/json"
+                )
 
-            print(f"Translation (S3) successful: {output_key}")
+                print(f"Translation (S3) successful: {output_key}")
 
     except Exception as e:
         print("Error:", str(e))
@@ -131,6 +132,6 @@ def lambda_handler(event, context):
                 "Content-Type": "application/json",
                 "Access-Control-Allow-Origin": "*",
                 "Access-Control-Allow-Methods": "POST,OPTIONS",
-                "Access-Control-Allow-Headers": "*"
+                "Access-Control-Allow-Headers": "Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token"
             }
- }
+        }

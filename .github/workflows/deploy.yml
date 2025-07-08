@@ -9,9 +9,9 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      BUCKET_NAME: cloudlingo-frontend-5nb17w # ✅ Replace with your actual bucket
-      DIST_DIR: dist # Vite's default output folder
-      AWS_REGION: us-east-1 # Your AWS region
+      BUCKET_NAME: cloudlingo-frontend-5nb17w
+      DIST_DIR: dist
+      AWS_REGION: us-east-1
 
     steps:
       - name: Checkout code
@@ -26,9 +26,12 @@ jobs:
         working-directory: react-frontend
         run: npm install
 
-      - name: Build the React app
+      - name: Inject API URL and build the React app
         working-directory: react-frontend
-        run: npm run build
+        run: |
+          echo "VITE_API_URL=${{ secrets.CLOUDLINGO_API_URL }}" > .env
+          cat .env  # Optional: Confirm env var is injected
+          npm run build
 
       - name: Upload index.html with no-cache
         working-directory: react-frontend
