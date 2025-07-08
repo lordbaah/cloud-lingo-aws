@@ -11,11 +11,11 @@ export async function translateText(
   targetLanguage: string
 ): Promise<TranslationResponse> {
   // Replace this URL with your actual CloudLingo API endpoint
-  const API_ENDPOINT = import.meta.env.VITE_TRANSLATE_API_URL;
+  // const API_ENDPOINT = import.meta.env.VITE_TRANSLATE_API_URL;
 
-  // const API_ENDPOINT =
-  //   import.meta.env.VITE_TRANSLATE_API_URL ||
-  //   'https://your-api-endpoint.com/translate';
+  const API_ENDPOINT =
+    import.meta.env.VITE_TRANSLATE_API_URL ||
+    'https://17tyme8omc.execute-api.us-east-1.amazonaws.com/translate';
 
   const requestBody = {
     text,
