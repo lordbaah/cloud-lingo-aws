@@ -1,29 +1,51 @@
 name: Deploy React to S3
 
-# Trigger the workflow on push to the feature/api-gateway branch
 on:
   push:
-    branches: [feature/api-gateway]
+    branches: [feature/api-gateway] # Trigger only on pushes to this branch
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest # Use the latest Ubuntu environment on GitHub-hosted runner
+    runs-on: ubuntu-latest
 
     env:
-      BUCKET_NAME: cloudlingo-frontend-5nb17w # 🪣 Name of your S3 bucket to deploy to
-      DIST_DIR: dist # 📁 Output directory after build (dist for Vite, build for CRA)
+      BUCKET_NAME: cloudlingo-frontend-5nb17w # Target S3 bucket
+      DIST_DIR: dist # Change to 'build' if you're using Create React App
 
     steps:
-      # Step 1: Checkout the repository code
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v3 # Fetch repository code
 
-      # Step 2: Set up Node.js environment (v18 in this case)
       - name: Set up Node
         uses: actions/setup-node@v3
         with:
-          node-version: 18
+          node-version: 18 # Ensure correct Node.js version
 
-      # Step 3: Install project dependencies
-      # 🔧 NOTE: Change working-directory if your project is inside a folder
       - name: Install dependencies
+        run: npm install
+        working-directory: ./cloud-lingo-aws # Point to app directory
+
+      - name: Build the React app
+        run: npm run build
+        working-directory: ./cloud-lingo-aws # Outputs to dist/
+
+      - name: Upload to S3
+        uses: jakejarvis/s3-sync-action@master
+        with:
+          args: --delete # Remove old files from S3
+        env:
+          AWS_S3_BUCKET: ${{ env.BUCKET_NAME }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }} # Stored in GitHub secrets
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          SOURCE_DIR: ./cloud-lingo-aws/${{ env.DIST_DIR }}
+          DEST_DIR: /
+
+      - name: Invalidate CloudFront cache
+        uses: chetan/invalidate-cloudfront-action@v2
+        with:
+          distribution-id: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} # CloudFront distribution to refresh
+          paths: '/*' # Invalidate entire cache
+        env:
+          AWS_REGION: us-east-1
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
