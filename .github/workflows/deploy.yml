@@ -2,7 +2,7 @@ name: Deploy React to S3
 
 on:
   push:
-    branches: [feature/api-gateway] # 🔁 Change this if needed
+    branches: [feature/api-gateway] # Change as needed
 
 jobs:
   build-and-deploy:
@@ -29,8 +29,7 @@ jobs:
       - name: Inject API URL and build the React app
         working-directory: react-frontend
         run: |
-          echo "VITE_API_URL=${{ secrets.CLOUDLINGO_API_URL }}" > .env
-          cat .env  # Optional: Confirm env var is injected
+          echo "VITE_TRANSLATE_API_URL=${{ secrets.CLOUDLINGO_API_URL }}" > .env
           npm run build
 
       - name: Upload index.html with no-cache
