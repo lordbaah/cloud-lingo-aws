@@ -68,7 +68,7 @@ function App() {
           <p className="text-gray-600">
             Translate text between different languages using AWS Translate
           </p>
-          <p>This is capstone project</p>
+          <p>Added github actions</p>
         </div>
 
         {/* Main Translation Interface */}
