@@ -2,7 +2,7 @@ name: Deploy React to S3
 
 on:
   push:
-    branches: [feature/api-gateway] # Change as needed
+    branches: [main] # Change as needed
 
 jobs:
   build-and-deploy:
