@@ -2,50 +2,50 @@ name: Deploy React to S3
 
 on:
   push:
-    branches: [feature/api-gateway] # 🚀 Trigger deployment on push to this branch
+    branches: [feature/api-gateway] # change as needed
 
 jobs:
   build-and-deploy:
-    runs-on: ubuntu-latest # 🧱 Use GitHub-hosted Ubuntu runner
+    runs-on: ubuntu-latest
 
     env:
-      BUCKET_NAME: cloudlingo-frontend-5nb17w # 🪣 Target S3 bucket name
-      DIST_DIR: dist # 📁 Build output directory (for Vite)
+      BUCKET_NAME: cloudlingo-frontend-5nb17w # <-- ✅ replace with your real bucket name
+      DIST_DIR: dist # or build (for CRA)
+      AWS_REGION: us-east-1 # your AWS region
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3 # 📥 Pull latest code from the repo
+        uses: actions/checkout@v3
 
       - name: Set up Node
         uses: actions/setup-node@v3
         with:
-          node-version: 18 # 🔧 Set Node.js version used by the project
+          node-version: 18
 
       - name: Install dependencies
         run: npm install
-        working-directory: ./react-frontend # 📦 Ensure it runs in the correct project folder
+        working-directory: ./react-frontend
 
       - name: Build the React app
         run: npm run build
-        working-directory: ./react-frontend # 🏗️ Compile the app into static files
+        working-directory: ./react-frontend
 
       - name: Upload to S3
         uses: jakejarvis/s3-sync-action@master
         with:
-          args: --delete # 🔁 Sync files and remove any not present in new build
+          args: --delete
         env:
           AWS_S3_BUCKET: ${{ env.BUCKET_NAME }}
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }} # 🔐 Provided via GitHub Secrets
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          SOURCE_DIR: ./react-frontend/${{ env.DIST_DIR }} # 📤 Upload built files from this path
+          SOURCE_DIR: ./react-frontend/${{ env.DIST_DIR }}
           DEST_DIR: /
 
       - name: Invalidate CloudFront cache
         uses: chetan/invalidate-cloudfront-action@v2
-        with:
-          distribution-id: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }} # 🔄 Ensure users get the latest build
-          paths: '/*'
         env:
-          AWS_REGION: us-east-1
+          DISTRIBUTION: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+          PATHS: '/*'
+          AWS_REGION: ${{ env.AWS_REGION }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
